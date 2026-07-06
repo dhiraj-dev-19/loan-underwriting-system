@@ -19,3 +19,8 @@ pynvml>=11.5
 
 # RAPIDS (install via conda in WSL2, NOT pip):
 # cudf, cuml — see RAPIDS Release Selector at https://rapids.ai/install
+
+# Person B dependencies (Streamlit + Gemini)
+streamlit>=1.30
+google-genai>=1.0
+python-dotenv>=1.0

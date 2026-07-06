@@ -24,6 +24,9 @@ _PROJECT_ROOT = os.path.abspath(os.path.join(_SCRIPT_DIR, "..", ".."))
 if _PROJECT_ROOT not in sys.path:
     sys.path.insert(0, _PROJECT_ROOT)
 
+from dotenv import load_dotenv
+load_dotenv(os.path.join(_PROJECT_ROOT, ".env"))
+
 from src.person_a.column_mapping import ALL_MODEL_FEATURES, CONTRACT_FEATURES
 
 # ---------------------------------------------------------------------
@@ -33,7 +36,6 @@ MODEL_PATH = os.path.join(_PROJECT_ROOT, "data", "model.pkl")
 CLEAN_CSV = os.path.join(_PROJECT_ROOT, "data", "clean_data.csv")
 CACHE_PATH = os.path.join(_PROJECT_ROOT, "data", "cohort_cache.json")
 
-GCP_PROJECT_ID = os.environ.get("GCP_PROJECT_ID", "your-gcp-project-id")
 BQ_DATASET = os.environ.get("BQ_DATASET", "loan_underwriting")
 BQ_TABLE = os.environ.get("BQ_TABLE", "loan_applicants")
 BQ_QUERY_TIMEOUT_SECONDS = float(os.environ.get("BQ_QUERY_TIMEOUT", "5.0"))
@@ -163,8 +165,14 @@ def _query_bigquery_cohort(
     """
     from google.cloud import bigquery
 
-    client = bigquery.Client(project=GCP_PROJECT_ID)
-    table_ref = f"`{GCP_PROJECT_ID}.{BQ_DATASET}.{BQ_TABLE}`"
+    gcp_project_id = os.environ.get("GCP_PROJECT_ID")
+    if not gcp_project_id:
+        raise KeyError(
+            "GCP_PROJECT_ID environment variable is missing or empty. Please set it in your .env file."
+        )
+
+    client = bigquery.Client(project=gcp_project_id)
+    table_ref = f"`{gcp_project_id}.{BQ_DATASET}.{BQ_TABLE}`"
 
     # Progressive income bands: +-15%, +-30%, +-50%, then full population
     bands = [0.15, 0.30, 0.50]
